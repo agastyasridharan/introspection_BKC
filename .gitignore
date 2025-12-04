@@ -29,7 +29,7 @@ old_results/*.parquet
 saved_vectors/**/*.pt
 
 # Plots (can be regenerated)
-plots/*.png
+# plots/*.png
 
 # Job outputs
 scripts/out/*.out
