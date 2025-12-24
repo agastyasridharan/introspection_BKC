@@ -46,7 +46,7 @@ def main():
                        default=list(range(32)),
                        help="Layer indices to sweep (default: 0-31)")
     parser.add_argument("--save_dir", type=str,
-                       default="/n/home10/ehahami/work/nov26_experiments/saved_vectors/llama",
+                       default="saved_vectors/llama",
                        help="Directory to save vectors")
     
     args = parser.parse_args()
