@@ -10,21 +10,25 @@ from pathlib import Path
 
 # Load model and tokenizer
 print("Loading model and tokenizer...")
-model = AutoModelForCausalLM.from_pretrained("meta-llama/Meta-Llama-3.1-8B-Instruct")
-tokenizer = AutoTokenizer.from_pretrained("meta-llama/Meta-Llama-3.1-8B-Instruct")
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Meta-Llama-3.1-8B-Instruct"
+)
+tokenizer = AutoTokenizer.from_pretrained(
+    "meta-llama/Meta-Llama-3.1-8B-Instruct"
+)
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 print(f"Model loaded on {device}")
 
 # Load a test vector (use any existing vector)
-vector_dir = Path('saved_vectors/llama/')
+vector_dir = Path("saved_vectors/llama/")
 if not vector_dir.exists():
     print("ERROR: saved_vectors/llama/ directory not found.")
     print("You need to run save_vectors.py first to generate concept vectors.")
     exit(1)
 
-# Find any vector file
-vector_files = list(vector_dir.glob('*.pt'))
+vector_files = list(vector_dir.glob("*.pt"))
 if not vector_files:
     print("ERROR: No .pt files found in saved_vectors/llama/")
     print("You need to run save_vectors.py first.")
@@ -33,54 +37,57 @@ if not vector_files:
 test_vector_path = vector_files[0]
 print(f"\nUsing test vector: {test_vector_path.name}")
 
-# Parse concept name from filename
-concept_name = test_vector_path.stem.rsplit('_', 2)[0]
+# Load vector properly
+vector_data = torch.load(test_vector_path, map_location=device)
+steering_vector = vector_data["vector"]
+concept_name = vector_data["concept_name"]
+
 print(f"Concept: {concept_name}")
 
 # Test prompt
 test_prompt = "Tell me about your thoughts right now."
 
-print("\n" + "="*60)
+print("\n" + "=" * 60)
 print("TEST 1: Control trial (coeff=0, should NOT mention concept)")
-print("="*60)
+print("=" * 60)
 
 response_control = inject_concept_vector(
     model=model,
     tokenizer=tokenizer,
-    steering_vector=test_vector_path,
-    layer_to_inject=15,
+    steering_vector=steering_vector,
+    layer_to_inject=vector_data["layer"],
     coeff=0.0,  # CONTROL
     inference_prompt=test_prompt,
     assistant_tokens_only=True,
-    max_new_tokens=30
+    max_new_tokens=30,
 )
 
 print(f"Control response (coeff=0):\n{response_control}\n")
 control_mentions_concept = concept_name.lower() in response_control.lower()
 print(f"Mentions '{concept_name}': {control_mentions_concept}")
 
-print("\n" + "="*60)
+print("\n" + "=" * 60)
 print("TEST 2: Injection trial (coeff=12, should mention concept)")
-print("="*60)
+print("=" * 60)
 
 response_injection = inject_concept_vector(
     model=model,
     tokenizer=tokenizer,
-    steering_vector=test_vector_path,
-    layer_to_inject=15,
+    steering_vector=steering_vector,
+    layer_to_inject=vector_data["layer"],
     coeff=12.0,  # INJECTION
     inference_prompt=test_prompt,
     assistant_tokens_only=True,
-    max_new_tokens=30
+    max_new_tokens=30,
 )
 
 print(f"Injection response (coeff=12):\n{response_injection}\n")
 injection_mentions_concept = concept_name.lower() in response_injection.lower()
 print(f"Mentions '{concept_name}': {injection_mentions_concept}")
 
-print("\n" + "="*60)
+print("\n" + "=" * 60)
 print("SUMMARY")
-print("="*60)
+print("=" * 60)
 print(f"Control (coeff=0) mentions concept: {control_mentions_concept}")
 print(f"Injection (coeff=12) mentions concept: {injection_mentions_concept}")
 
@@ -98,9 +105,9 @@ else:
     print("\n⚠️  UNEXPECTED: Control mentions concept but injection doesn't.")
     print("   This is very unusual. Try running again.")
 
-print("\n" + "="*60)
+print("\n" + "=" * 60)
 print("RECOMMENDATION")
-print("="*60)
+print("=" * 60)
 if control_mentions_concept:
     print("❌ DO NOT PROCEED: Fix coeff=0 handling in inject_concept_vector.py first")
 else:
