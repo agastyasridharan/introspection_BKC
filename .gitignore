@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data and results (large files)
+# new_results/*.csv
+# new_results/*.parquet
+old_results/*.csv
+old_results/*.parquet
+
+# Saved vectors (large binary files)
+saved_vectors/**/*.pt
+
+# Plots (can be regenerated)
+# plots/*.png
+
+# Job outputs
+scripts/out/*.out
+scripts/out/*.err
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.log
+
