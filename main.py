@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import argparse
 from api_utils import query_llm_judge
-from all_prompts import get_anthropic_reproduce_messages, get_anthropic_reproduce_binary_messages, get_open_ended_belief_messages, get_generative_distinguish_messages, get_mcq_messages, get_injection_strength_messages
+from all_prompts import get_anthropic_reproduce_messages, get_anthropic_reproduce_binary_messages, get_open_ended_belief_messages, get_generative_distinguish_messages, get_mcq_messages, get_injection_strength_messages, get_anthropic_reproduce_no_base_rate_messages
 torch.manual_seed(2881)
 # Distractors pool (randomly sampled words)
 DISTRACTORS = ["Apple", "Zest", "Laughter", "Intelligence", "Vibrant", "Sad", "Beach", "Pottery", "Jewelry"]
@@ -67,6 +67,8 @@ def test_vector_multiple_choice(vector_path, model=None, tokenizer=None, max_new
         messages = get_generative_distinguish_messages(concept)
     elif type == "anthropic_reproduce":
         messages = get_anthropic_reproduce_messages()
+    elif type == "anthropic_reproduce_no_base_rate":
+        messages = get_anthropic_reproduce_no_base_rate_messages()
     elif type == "anthropic_reproduce_binary":  # NEW CASE
         messages = get_anthropic_reproduce_binary_messages()
     elif type == "injection_strength":
@@ -193,7 +195,7 @@ def main():
     parser.add_argument("--coeffs", type=float, nargs="+", default=[10, 12],
                        help="Coefficient values to test (default: [10, 12])")
     parser.add_argument("--type", type=str, default="injection_strength",
-                       choices=["anthropic_reproduce", "anthropic_reproduce_binary", "mcq_knowledge", "mcq_distinguish", "open_ended_belief", "generative_distinguish", "injection_strength"],
+                       choices=["anthropic_reproduce", "anthropic_reproduce_no_base_rate", "anthropic_reproduce_binary", "mcq_knowledge", "mcq_distinguish", "open_ended_belief", "generative_distinguish", "injection_strength"],
                        help="Experiment type (default: injection_strength)")
     parser.add_argument("--assistant_tokens_only", action="store_true", default=True,
                        help="Only inject at assistant tokens (default: True)")
@@ -338,7 +340,7 @@ def main():
     # Select grader types based on experiment type
     if experiment_type == "anthropic_reproduce_binary":
         grader_types = ["coherence_and_binary_detection"]
-    elif experiment_type == "anthropic_reproduce":
+    elif experiment_type in ["anthropic_reproduce", "anthropic_reproduce_no_base_rate"]:
         grader_types = ["coherence_and_affirmative_response_followed_by_correct_identification"]
     elif experiment_type in ["mcq_knowledge", "mcq_distinguish"]:
         grader_types = ["coherence_and_mcq_correct"]

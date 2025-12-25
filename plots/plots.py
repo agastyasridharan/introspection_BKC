@@ -34,6 +34,7 @@ from collections import defaultdict
 EXPERIMENT_TYPES = [
     "anthropic_reproduce",
     "anthropic_reproduce_binary",
+    "anthropic_reproduce_no_base_rate",
     "mcq_knowledge",
     "mcq_distinguish",
     "open_ended_belief",
@@ -63,7 +64,7 @@ def compute_success_rate(df: pd.DataFrame, experiment_type: str):
                 if subset.empty:
                     continue
 
-                if experiment_type == "anthropic_reproduce":
+                if experiment_type in ["anthropic_reproduce", "anthropic_reproduce_no_base_rate"]:
                     successes = subset["coherence_judge"] & subset["affirmative_response_followed_by_correct_identification_judge"]
 
                 elif experiment_type == "anthropic_reproduce_binary":
