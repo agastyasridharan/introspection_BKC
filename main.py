@@ -200,7 +200,25 @@ def main():
     results_dir = Path('new_results')
     results_dir.mkdir(exist_ok=True)
     csv_path = results_dir / f'output_{experiment_type}.csv'
-    csv_initialized = False  # Track if CSV header has been written
+
+    # --- CRITICAL FIX: always initialize CSV with header ---
+    pd.DataFrame(columns=[
+    'concept',
+    'vec_type',
+    'layer',
+    'coeff',
+    'type',
+    'assistant_tokens_only',
+    'coherence_judge',
+    'thinking_about_word_judge',
+    'affirmative_response_judge',
+    'affirmative_response_followed_by_correct_identification_judge',
+    'mcq_correct_judge',
+    'injection_strength_correct_judge',
+    'expected_strength_category',
+    'response'
+    ]).to_csv(csv_path, index=False)
+
 
     # Aggregate results per (layer, coeff, grader_type)
     # Structure: layer_results[layer][coeff][grader_type] = list of bools
