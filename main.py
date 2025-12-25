@@ -244,11 +244,10 @@ def main():
     # Set up incremental CSV saving
     results_dir = Path('new_results')
     results_dir.mkdir(exist_ok=True)
-    csv_path = results_dir / f'output_{experiment_type}.csv'
+    scope = "assistant" if assistant_tokens_only else "all_tokens"
+    csv_path = results_dir / f'output_{experiment_type}_{scope}.csv'
     csv_initialized = False  # Track if CSV header has been written
 
-    # Aggregate results per (layer, coeff, grader_type)
-    # Structure: layer_results[layer][coeff][grader_type] = list of bools
     # Aggregate results per (layer, coeff, grader_type)
     # Structure: layer_results[layer][coeff][grader_type] = list of bools
     layer_results = defaultdict(lambda: defaultdict(lambda: {
@@ -361,6 +360,7 @@ def main():
             for grader_type in grader_types:
                 if grader_type == "coherence":
                     values = [c for c in metrics["coherence"] if c is not None]
+
                 elif grader_type == "coherence_and_binary_detection":
                     values = [
                         c and b
